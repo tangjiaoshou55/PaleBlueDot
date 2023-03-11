@@ -147,46 +147,40 @@ object PaleBlueDot {
    *         a single city
    */
   def closestCity(citiesFilename: String, location: List[Double]): List[String] = {
-
-    val citiesFile: BufferedSource = Source.fromFile(citiesFilename)
-
+    val lat1:Double=location(0)
+    val lon1:Double=location(1)
     val R = 6371e3; // metres
-    val φ1 = location(0) * math.Pi/180; // φ, λ in radians
-    var min = 0.0
-    var cityList: List[String] = List()
-
-    for (line <- citiesFile.getLines()) {
-      val splits: Array[String] = line.split(",")
-
-      if (splits(0) != "Country"){
-        val φ2 = splits(4).toDouble * math.Pi/180;
-        val Δφ = (splits(4).toDouble-location(0)) * math.Pi/180;
-        val Δλ = (splits(5).toDouble-location(1)) * math.Pi/180;
-
-        val a = math.sin(Δφ/2) * math.sin(Δφ/2) +
-          math.cos(φ1) * math.cos(φ2) *
-            math.sin(Δλ/2) * math.sin(Δλ/2);
-        val c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a));
-
-        val d = R * c; // in metres
-
-        if (cityList == List()) {
-          min = d
-          cityList = cityList :+ splits(0)
-          cityList = cityList :+ splits(1)
-          cityList = cityList :+ splits(2)
-        }
-        else if (min > d) {
-          min = d
-          cityList.updated(0, splits(0))
-          cityList.updated(1, splits(1))
-          cityList.updated(2, splits(2))
-        }
+    var lowest:Double=999999999
+    var countrycode:String="splits(0)"
+    var cityname:String="splits(1)"
+    var region:String="splits(2)"
+    var out=List(countrycode,cityname,region)
+    val file: BufferedSource= Source.fromFile(citiesFilename)
+    for (line<-file.getLines()){
+      var content:String=""
+      content+=line
+      val splits: Array[String] = content.split(",")
+      if (splits(0)!="Country"){
+        val lat2:Double=splits(4).toDouble
+        val lon2=splits(5).toDouble
+        val φ1 = lat1*(Math.PI/180); // φ, λ in radians
+        val φ2 = lat2 * (Math.PI/180);
+        val Δφ = (lat2-lat1) * Math.PI/180;
+        val Δλ = (lon2-lon1) * Math.PI/180;
+        val a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+          Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        val d:Double = R * c; // in metres
+        var countrycode:String=splits(0)
+        var cityname:String=splits(1)
+        var region:String=splits(2)
+        if (d<lowest){
+          lowest=d
+          out=List(countrycode,cityname,region)
+        };
       }
+    };return out
 
-    }
-
-    return cityList
   }
 
 

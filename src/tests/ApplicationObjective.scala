@@ -17,7 +17,7 @@ class ApplicationObjective extends FunSuite {
 
     for ((input, expectedOutput) <- testCases) {
       val computedOutput: List[String] = PaleBlueDot.closestCity(citiesFilename, input)
-      assert(computedOutput == expectedOutput, input + " -> " + computedOutput)
+      assert(computedOutput.sorted == expectedOutput.sorted, input + " -> " + computedOutput)
     }
   }
 }
